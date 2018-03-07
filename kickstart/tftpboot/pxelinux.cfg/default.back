@@ -1,0 +1,22 @@
+default ks
+prompt 1
+timeout 6
+display boot.msg
+F1 boot.msg
+F2 options.msg
+F3 general.msg
+F4 param.msg
+F5 rescue.msg
+label linux
+kernel vmlinuz
+append initrd=initrd.img
+label text
+kernel vmlinuz
+append initrd=initrd.img text
+label ks
+kernel vmlinuz
+append ks=http://192.168.0.65/ks.cfg initrd=initrd.img
+localboot 1
+label memtest86
+kernel memtest
+append -

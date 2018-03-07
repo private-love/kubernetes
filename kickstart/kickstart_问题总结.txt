@@ -1,0 +1,43 @@
+一、dhcp问题
+1.未关闭防火墙
+关闭firewall：
+systemctl stop firewalld.service    #停止firewall
+systemctl disable firewalld.service  #禁止firewall开机启动
+firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，开启后显示running）
+内核防火墙必须关闭
+2.dhcp版本
+在dhcp配置文件中，以前版本next-server写在subnet外面
+
+next-server 192.168.0.65;
+filename "pxelinux.0";
+subnet 192.168.0.0 netmask 255.255.255.0 {
+option routers 192.168.0.1;
+option subnet-mask 255.255.255.0;
+option domain-name-servers 114.114.114.114,218.2.135.1;
+range dynamic-bootp 192.168.0.240 192.168.0.244;
+default-lease-time 21600;
+max-lease-time 43200;
+}
+
+解决：
+dhcp 4.2.5需要把next-server写在subnet里面
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+option routers 192.168.0.1;
+option subnet-mask 255.255.255.0;
+option domain-name-servers 114.114.114.114,218.2.135.1;
+range dynamic-bootp 192.168.0.240 192.168.0.244;
+default-lease-time 21600;
+max-lease-time 43200;
+next-server 192.168.0.65;
+filename "pxelinux.0";
+}
+
+二、tftpboot内文件问题
+在/var/lib/tftpboot中缺少vesamenu.c32
+报错：vesamenu.c32: Not a COM32R image boot
+
+解决：（centos7才需要这个文件，centos6不需要）
+从iso文件中拷贝出vesamenu.c32，放入tftpboot目录下
+cp /var/ftp/pub/isolinux/vesamenu.c32 /var/lib/tftpboot/
+
