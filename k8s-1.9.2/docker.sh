@@ -1,6 +1,6 @@
 systemctl disable firewalld;systemctl stop firewalld
 swapoff -a
-sed 's/.*swap.*/#&/' /etc/fstab
+sed -i 's/.*swap.*/#&/' /etc/fstab
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
