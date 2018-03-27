@@ -1,0 +1,43 @@
+#!/bin/bash
+servicelist=("etcd.service" "etcd-calico.service" "kube-apiserver.service" "kube-controller-manager.service" "kubelet.service" "kube-proxy.service" "kube-scheduler.service")
+function stop () {
+for i in ${servicelist[@]}
+do 
+	systemctl status $i|grep running
+	if [ $? == 0 ]
+	then
+		systemctl stop $i
+	fi
+done
+}
+function check () {
+for i in ${servicelist[@]}
+do
+	l=`systemctl is-enabled $i`
+	if [ $l == "enabled" ]
+	then 
+		systemctl status $i|grep running
+		[ $? == 0 ] && echo -e ''$i' is \033[32mrunning\033[0m'
+	fi
+done
+ips=("192.168.1.146" "192.168.1.147" "192.168.1.148" )
+for i in ${ips[@]}
+do
+etcdctl --endpoints=https://$i:2379 --cert-file=/data/k8s/ssl/etcd/etcd.pem --ca-file=/data/k8s/ssl/kubernetes/ca.pem --key-file=/data/k8s/ssl/etcd/etcd-key.pem cluster-health|grep unhealthy
+[ $? == 1 ] && echo -e ''$i'  \033[32metcd healthy\033[0m'
+etcdctl --endpoints=http://$i:2389 cluster-health|grep unhealthy
+[ $? == 1 ] && echo -e ''$i'  \033[32metcd-calico healthy\033[0m'
+done
+}
+function start () {
+/opt/ci123/nrpe-3.2.1/bin/nrpe -c /opt/ci123/nrpe-3.2.1/etc/nrpe.cfg -d
+}
+if [ "$1" = "start" ]; then
+    start
+elif [ "$1" = "check" ]; then
+    check
+elif [ "$1" = "stop" ]; then
+    stop
+else
+    printf "Usage: ./init.sh {stop|check|start}\n"
+fi
