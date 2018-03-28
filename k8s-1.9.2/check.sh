@@ -9,7 +9,7 @@ function pod () {
 nginx=`kubectl get pod -o wide|grep nginx-ds`
 if [ ! -n "$nginx" ]
 then 
-cat > nginx-ds.yaml << EOF
+cat > nginx-ds.yml << EOF
 apiVersion: v1
 kind: Service
 metadata:
@@ -71,6 +71,7 @@ do
         fi
    done
 done
+kubectl delete -f nginx-ds.yml
 }
 etcd
 pod
